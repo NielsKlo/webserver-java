@@ -1,12 +1,13 @@
 package nl.sogyo.webserver;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface Request {
     HttpMethod getHTTPMethod();
     String getResourcePath();
     List<String> getHeaderParameterNames();
-    String getHeaderParameterValue(String name);
+    Optional<String> getHeaderParameterValue(String name);
     List<String> getParameterNames();
-    String getParameterValue(String name);
+    Optional<String> getParameterValue(String name);
 }
