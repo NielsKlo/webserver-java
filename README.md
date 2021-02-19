@@ -1,4 +1,4 @@
-This assignment will focus on creating your own web server from scratch. During the introductory weeks you have made programs that handle user input from the command line. Conceptually, a web server isn't all that much more. Now the user doesn't interact with your application directly. Instead, the user input will reach your application via the internet. For you as a programmer, that will mean that you won't use `System.in` as input, but a so-called socket. Using low-level primitives like this, we will build our own web server framework.
+This assignment will focus on creating your own web server from scratch. During the introductory weeks you have made programs that handle user input from the command line. Conceptually, a web server isn't all that much different. In a web server, the user doesn't interact with your application directly. Instead, the user input will reach your application via the internet. For you as a programmer, that will mean that you won't use `System.in` as input, but a so-called socket. Using low-level primitives like this, we will build our own web server framework.
 
 ## Step 1: listening loop
 
@@ -11,7 +11,7 @@ This will focus on the general concepts of a web server. In this repository, we 
      b. Handle the message in a background thread.
 ```
 
-These steps are found in the `main` method. The application is started and prepares the program to receive calls from the internet. The program listens to incoming messages on port 9090. An incoming connection is assigned to a socket (basically a phone wire). The socket can be used to send messages back and forth. The basics are configured and your application can communicate with other computers now. Generally, your computer and network prevents other computers from connecting to it using a firewall. The firewall is configured conservatively in order to reduce the attack surface of your machine.
+These steps are found in the `main` method. The application is started and prepares the program to receive calls from the internet. The program listens to incoming messages on port 9090. An incoming connection is assigned to a socket (basically a phone wire). The socket can be used to send messages back and forth. The basics are configured and your application can now communicate with other computers. Generally, your computer and network prevents other computers from connecting to it using a firewall. The firewall is configured conservatively in order to reduce the attack surface of your machine.
 
 ## Step 2: Basic communication
 
@@ -52,7 +52,7 @@ Back to our HTTP/1.1 implementation. The first block after the first line are th
 
 The headers are _always_ followed by a blank line. This way, the server can know that all headers arrived. The blank line is also when the initial program stops reading the request. If there is one, the body of the request message (usually only with the PUT/POST method) follows after the blank line. The structure of the body is determined by the one announced as [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) in the header (e.g. `application/json`).
 
-The eagle-eyed among you will notice that in the HTTP method, the resource path and the HTTP version do now allow spaces. The line endings are Windows (`\r\n`).
+The eagle-eyed among you will notice that in the HTTP method, the resource path and the HTTP version do not allow spaces. The line endings are Windows (`\r\n`).
 
 An example:
 
