@@ -1,60 +1,60 @@
-In deze opdracht gaan we onze eigen webserver opzetten. Jullie hebben al ervaring met het opzetten van een programma dat input van gebruikers afhandelt. Een webserver is qua concept niet heel veel anders. In plaats van dat de client direct tegen de applicatie praat, verloopt de communicatie nu via een internetlijntje - een socket. We gaan stapsgewijs een eigen framework bouwen middels de basisgereedschappen (low level primitives) van de taal.
+This assignment will focus on creating your own web server from scratch. During the introductory weeks you have made programs that handle user input from the command line. Conceptually, a web server isn't all that much different. In a web server, the user doesn't interact with your application directly. Instead, the user input will reach your application via the internet. For you as a programmer, that will mean that you won't use `System.in` as input, but a so-called socket. Using low-level primitives like this, we will build our own web server framework.
 
-## Ingrediënt 1: listening loop
+## Step 1: listening loop
 
-We gaan hier de algemene concepten van een webserver uitleggen. We hebben het een en ander voor je opgezet in deze repository. De code is ook uitgebreid gedocumenteerd, zodat het hopelijk zichzelf uitwijst. Grofweg bestaat de opzet uit:
-
-```bash
-1. Zet een poort open over de TCP-communicatie
-2. Herhaal ad infinitum:
-     a. Ontvang verbinding op een zogenaamde socket
-     b. Verwerk bericht op de achtergrond
-```
-
-Dit stappenplan kun je vinden in de `main`-methode. Hier start je applicatie en tref je de voorbereidingen om requests te ontvangen over het internet. De applicatie begint te luisteren naar een inkomend verzoek op poort 9090. Een binnenkomend verzoek wordt toegewezen aan een socket (als het ware een soort telefoonlijn), waarover je heen en weer communicatie kan uitwisselen. In principe is binnen je applicatie hiermee alles geregeld om te kunnen communiceren met de buitenwereld. Wat andere computers belet om met jouw pc te verbinden, is over het algemeen de firewall-instellingen van je OS. Deze staan standaard beperkt ingesteld om de kans op aanvallen te verkleinen.
-
-## Ingrediënt 2: Basiscommunicatie
-
-Als we in wat meer detail gaan kijken naar de afhandeling van het bericht, dan komen we op het volgende stappenplan:
+This will focus on the general concepts of a web server. In this repository, we have created a simple stub. The code is documented rather thoroughly, which should aid you in understanding what the role of every cog in the machinery is. Roughly, the basic premise is:
 
 ```bash
-1. Lees het inkomende bericht uit. Herhaal tot we een lege regel tegenkomen:
-     a. Lees een regel uit de socket.
-     b. Schrijf de regel naar de standard output.
-2. Verzend een eenvoudig bericht naar de client over de socket.
+1. Ensure that your program listens to TCP communications on a specified port.
+2. Repeat infinitely:
+     a. Receive an incoming connection on a socket.
+     b. Handle the message in a background thread.
 ```
 
-Door dit te implementeren (refereer naar de gegeven code om te zien wat de details van de implementatie zijn) hebben we de communicatie heen en weer in hele simpele vorm bewerkstelligd. We kunnen in onze output de binnengekomen informatie zien en we sturen een bericht terug naar de client. Je kunt de webserver opstarten en kijken of we de waarheid spreken. De webserver is benaderbaar op localhost:9090. Zoals we straks zullen zien, voldoet dit bericht geenszins aan de [HTTP-standaard](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol). Dit betekent dat de gemiddelde browser het antwoord van de webserver niet zal accepteren en een foutpagina zal tonen. Je kunt gebruik maken van [Postman](https://www.getpostman.com/) of [curl](https://curl.haxx.se/) om het bericht te tonen.
+These steps are found in the `main` method. The application is started and prepares the program to receive calls from the internet. The program listens to incoming messages on port 9090. An incoming connection is assigned to a socket (basically a phone wire). The socket can be used to send messages back and forth. The basics are configured and your application can now communicate with other computers. Generally, your computer and network prevents other computers from connecting to it using a firewall. The firewall is configured conservatively in order to reduce the attack surface of your machine.
 
-## Opdracht
+## Step 2: Basic communication
 
-De overkoepelende opdracht is om de webserver uit te breiden zodat het aan de HTTP-standaard voldoet. Hierbij willen we voor onszelf een laag over de primitives heen bouwen, wat ons op een hoger niveau in staat stelt om de HTTP-definities te herkennen. We gaan een klasse bouwen dat het binnenkomende bericht uitleest en omvormt tot een netta HTTP request. Evenzo willen wij ons antwoord op een high level kunnen definiëren als een HTTP response, die we vervolgens volgens de standaard weg kunnen schrijven over de verbinding. Gedurende de opdracht brengen we interactieve elementen in de webserver, zodat het antwoord verandert aan de hand van de binnengekomen informatie.
+We will now look at the message handling. In the initial code, this boils down to
 
-### Opdracht 1: HTTP request
+```bash
+1. Read the incoming message line by line. Repeat until we receive an empty line:
+     a. Read a line from the socket's input stream.
+     b. Echo the line to standard output (console).
+2. Send a simple message to the client by writing it to the socket's output stream.
+```
 
-Voor een volledig functionele webserver is het noodzakelijk om het binnenkomende requestbericht correct te interpreteren. Aan de hand hiervan kan besloten worden welke logica uitgevoerd wordt. Dit principe heet routing; het bepalen welke methode bij een bepaald pad hoort. Een [requestbericht volgens het HTTP-protocol](https://tools.ietf.org/html/rfc7230#section-3) heeft de volgende structuur:
+By implementing these two steps, we accomplished very basic communication between a client and your server. You can read the code to look at the implementation details. After receiving a request, we will print all received information to the console. Also, the response we sent is received by the client. You can manually verify this by running the program. Your server is reachable on `localhost:9090` (this machine, port 9090). Later on we will see that the response we send is not conform the [HTTP protocol](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol). This implies that the average client will not accept the answer of your web server and show an error page instead of our reply. You can use [Postman](https://www.getpostman.com/) or [curl](https://curl.haxx.se/) to show the reply.
+
+## Assignment
+
+The global assignment is to extend the web server. The web server should conform to the HTTP protocol. You will build an abstraction layer on top of the socket primitives. This will enable us to reason about the various data types, like headers, HTTP has, without concerning the formatting of the original request. We will build a class that reads the incoming message and transforms it into an HTTP request object. Likewise, we want to define our answer as an HTTP response object, which can format itself to be written to the socket's output.
+
+### Assignment 1: HTTP request
+
+A functioning web server should first and foremost be able to interpret the incoming request message. The information in the request message can then decide what application logic (methods) will be invoked. This principle is known as 'routing': determining which path resolves to which method. An [HTTP request message](https://tools.ietf.org/html/rfc7230#section-3) is formatted like:
 
 ```xml
-<http methode> <resource path> <http versie>
-<header parameter1>: <header parameter1 waarde>
-<header parameter2>: <header parameter2 waarde>
+<http method> <resource path> <http version>
+<header parameter1>: <header parameter1 value>
+<header parameter2>: <header parameter2 value>
 …
-<header parameterN>: <header parameterN waarde>
-[lege regel]
-<body regel1>
+<header parameterN>: <header parameterN value>
+[empty line]
+<body line1>
 …
-<body regelN>
+<body lineN>
 ```
 
-De eerste regel, bestaande uit de HTTP-methode, opgevraagde resource en de HTTP-versie wordt gebruikt om eerdergenoemde logica uit te voeren. Voor deze opdracht zullen we de simpele basis van HTTP/1.1 aanhouden, waarbij de browser de vraag stelt en de server antwoord geeft. [HTTP/2](https://daniel.haxx.se/http2/) biedt de mogelijkheid om de verbinding in stand te houden, waardoor de server actief informatie kan pushen (voor bijvoorbeeld liveblogs, chatrooms of om de hoeveelheid requests voor de doorsnee webpagina te reduceren). HTTP/3 is op tijde van schrijven in de prototype-fase.
+The first line consists of the [HTTP method](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods), the requested resource path (`/foo` in `localhost:9090/foo`) and the HTTP version. This line determines a hefty chunk of how the server should respond. For this assignment, we will assume the relatively simple HTTP/1.1 protocol. In HTTP/1.1 the client sends a request and the server sends a response - that's it. [HTTP/2](https://daniel.haxx.se/http2/) allows multiplex connections, in which the server can initiate another message, a so-called server push. This can be used for real time blogs, chat rooms or simply to reduce the amount of requests a browser needs to initiate. As of February 2021, HTTP/3 is in an "internet draft" state with multiple different prototype implementations.
 
-Het eerste blok aan regels zijn de zogenaamde headers. Dit is de metadata die een client (of webserver, zoals we later gaan zien bij het opbouwen van de response) meestuurt met het request. Het internet, en met name HTTP/1.1, is stateless; dat betekent dat een webserver in principe geen idee heeft wie er aan de andere kant van de lijn zit en of deze persoon al meerdere requests heeft gedaan. Een manier om de continuïteit te bewaren zijn de befaamde cookies. Deze worden ook als een header meegegeven. Verder kan de client aangeven wat de technische limitaties en gebruikerspreferenties zijn.
+Back to our HTTP/1.1 implementation. The first block after the first line are the so-called headers. These are request metadata that a client (or the server itself, as we will see when building the response) can send with the request. The internet, mainly HTTP/1.1, is stateless - in principle a web server has no means to know who sent the request and if that person already made several requests. One way of identifying yourself is the well-known cookie. Cookies are a standardized header that contain bite-sized pieces of information so that the server can identify the client. A client can also include technical limitations ("hey, I'm using Internet Explorer") or user preferences ("please give me the Dutch translation") in their headers.
 
-Na de headers volgt altijd een witregel. Dit is de manier waarop de server weet dat alle headers overgekomen zijn. Indien aanwezig volgt daarna in de body van het requestbericht (alleen aanwezig bij PUT/POST, bijvoorbeeld als je een formulier opstuurt). De structuur van deze body is vrij en wordt gecommuniceerd via de metadata.
+The headers are _always_ followed by a blank line. This way, the server can know that all headers arrived. The blank line is also when the initial program stops reading the request. If there is one, the body of the request message (usually only with the PUT/POST method) follows after the blank line. The structure of the body is determined by the one announced as [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) in the header (e.g. `application/json`).
 
-Als je verder in de details duikt, zul je zien dat er in de HTTP-methode, het resource path en de HTTP-versie geen spaties mogen zitten. De line-endings zijn Windows, dus `\r\n`.
+The eagle-eyed among you will notice that in the HTTP method, the resource path and the HTTP version do not allow spaces. The line endings are Windows (`\r\n`).
 
-Een concreet voorbeeld:
+An example:
 
 ```
 GET /books HTTP/1.1
@@ -69,29 +69,29 @@ Connection: keep-alive
 
 ```
 
-In de repository zit een request interface. Deze interface bevat high-level methodes om de boven beschreven informatie uit het request op te vragen. Schrijf een class die dit interface implementeert (`class Foo implements Request`), als je dat doet zul je zien dat je compiler errors krijgt. Het interface verplicht dat jouw class de zes methodes die erin gedefinieerd zijn implementeert. Schrijf voor de eerste vier een implementatie, de voor de twee niet-Header varianten kun je voorlopig een dummy implementatie schrijven; dit komt bij opdracht 3. Bedenk voor de vier methodes zelf hoe de informatie het beste tot die klasse kan komen.
-Als je de request hebt uitgelezen, kun je de uitgaande response aanpassen zodat deze afhangt van het binnengekomen bericht, zoals bijvoorbeeld:  “You did an HTTP GET request and you requested the following resource: /books”.
+An interface for the HTTP request is in the repository. This interface contains the high-level methods returning above information. Write a class that implements this interface (`class Foo implements Request`). If you do this, you'll notice some compiler errors. Implementing an interface required the class to implement all methods that are defined in the interface. Write an implementation for the first four methods. The other two methods can suffice with a dummy implementation - the real implementation will be made in the third assignment. Consider how the class can best encapsulate the information required to implement the interface.
 
+If you parsed the request, you can modify the response. For example, you can reply "You did an HTTP GET request and you requested the following resource: /books", reflecting the incoming message.
 
-### Opdracht 2: HTTP response
+### Assignment 2: HTTP response
 
-De volgende stap is om het antwoord van de server te formaliseren. Tot nu toe stuurden we een simpele tekstregel terug, waar menig browser vervolgens op afhaakte. We gaan in deze stap een formeel HTTP-antwoord opbouwen. Net als de request heeft ook de HTTP response een vaste structuur:
+The next step is to format the web server response. So far we just replied with a simple line of text. Not all clients can handle this properly. The second assignment is to reply with a formally correct HTTP response. Much like the HTTP request, the response also has a set structure:
 
 ```xml
-<http versie> <response status code> <korte beschrijving van de status code> 
-<header parameter1>: <header parameter1 waarde>
-<header parameter2>: <header parameter2 waarde>
+<http version> <response status code> <brief description of the status code> 
+<header parameter1>: <header parameter1 value>
+<header parameter2>: <header parameter2 value>
 …
-<header parameterN>: <header parameterN waarde>
-[lege regel]
-<body regel1>
+<header parameterN>: <header parameterN value>
+[empty line]
+<body line1>
 …
-<body regelN>
+<body lineN>
 ```
 
-De response-structuur volgt grotendeels de structuur van het request. De eerste regel vertelt hoe de server het verzoek heeft kunnen afhandelen (bijvoorbeeld 200 OK, maar er zijn [talloze status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)). Voor onze opdracht staat de HTTP-versie vast op HTTP/1.1. Daarnaast staat er metadata in de headers, volgt er weer een witregel en eventueel een body.
+Generally, the response is structured roughly the same as the request. The response has a first line, a set of headers, a blank line and optionally a body. The first line explains if and how the server was able to handle the request. Examples of status codes are 200 OK, 404 not found, 500 internal server error. There are [many more](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). For this assignment, you can pin the HTTP version to HTTP/1.1.
 
-Een voorbeeld van response van een Apache webserver:
+The following example is from an Apache web server:
 
 ```
 HTTP/1.1 200 OK
@@ -109,26 +109,26 @@ Requested resource: /books
 </html>
 ```
 
-In dit voorbeeld wordt er een antwoord teruggestuurd met een body (wat in de regel het geval is). Dit houdt in dat de headers `Content-Type` en `Content-Length` (in bytes) meegeleverd en correct moeten zijn. `Connection: close` betekent dat de server na het bericht de verbinding verbreekt. `Date` geeft de datum in [RFC1123-formaat](https://www.ietf.org/rfc/rfc1123.txt). De `Server`-header mag in principe verzonnen worden; dit is puur een identificatie voor de host. In theorie weet de browser aan de hand van de server of bepaalde functionaliteit wel of niet ondersteund wordt (dit wordt omgekeerd wel gebruikt, dat er andere pagina's geleverd worden aan gebruikers van Internet Explorer).
+This example contains a response with a body - generally all responses contain a body. When the server replies with a body, the headers `Content-Type` (MIME type) and `Content-Length` (measured in bytes) *must* be supplied and correct. Otherwise, clients will deny the response. `Connection: close` means that the server closes the socket after the reply has been sent. If the client wants to initiate another request, they need to open another connection to do so. `Date` supplies the server date in [RFC1123 format](https://www.ietf.org/rfc/rfc1123.txt). The `Server` header can contain arbitrary text ("Galloping fabulous unicorns" is a valid server name) and is mainly used as identification. Theoretically, the client can determine what features are supported on said server and browsers can work around known bugs. In practice however, this isn't really used. The other way around is more common: the server serves a different page to users of Internet Explorer or `myexampleapp.com/download` takes you directly to the download page for your operating system.
 
-In de repository staat een interface voor de response, die de elementen van het antwoord definieert. Maak een implementatie voor deze interface. Zorg ook dat, gegeven een object die de interface implementeert, de response wordt weggeschreven naar de uitgaande socket. Als alles goed gaat, dan zul je in de browser de body terugzien. Uitgaande van het voorbeeld, betekent dat de tekst "You did an HTTP GET request...". De meegestuurde headers zijn niet direct zichtbaar; de browser gebruikt dit alleen om het antwoord te interpreteren. Door in de developer tools van de browsers (F12 in Chrome en Firefox) te kijken, kun je alle informatie van de response bekijken.
+You will find an HTTP response interface inside of the repository. The interface defines the characteristics for the HTTP response. Implement this interface in a new class. Also make sure that the response is properly formatted and written to the socket's output stream. If everything is implemented correctly, you will see the text "You did an HTTP GET request..." in your browser. You won't see the headers on the screen even though your browser will use them to interpret the response. You can look in your favorite browser's development tools (usually F12 opens the developer tools). You can track the network request (possibly after refreshing the page while the tools are opened) and inspect every detail of the response.
 
-### Opdracht 3: Request parameters
+### Assignment 3: Request parameters
 
-Tot nu toe hebben we de minimale interpretatie van een HTTP request geïmplementeerd, namelijk alleen het vertalen van het standaardformaat. Soms wil een browser extra informatie meegeven aan de server behorend bij het request. Denk hierbij aan een zoekopdracht in je favoriete zoekmachine. Dit is niet echt een onderdeel van de metadata, maar meer inharent aan het request zelf. Om deze informatie mee te kunnen sturen, zijn url parameters bedacht. Voor een HTTP GET request zitten de parameters in de url, ofwel de eerste regel van het request:
+You implemented the minimal viable HTTP request in the first assignment. The format is parsed into a typed object. Sometimes a clients wants to supply additional information to the server. For example, a search query in your favourite search engine. This isn't really a part of the metadata, but an actual part of the request itself. One way of sending these kinds of information is URL parameters. This is the only way to send data using a GET request. It looks like:
 
 ```
 GET /search?hl=nl&q=java HTTP/1.1
 …
 ```
 
-In dit voorbeeld is het opgevraagde resource path nog steeds `/search` en zijn er twee parameters: `hl` en `q`, met de waarde `nl` en `java` respectievelijk. Formeel gezien kan de url als volgt uitgedrukt worden:
+The requested resource path is still `/search`. Two parameters are supplied: `hl` and `q` and their respective values `nl` and `java`. The URL can be generalised to
 
 ```
-<resource path>?<parameter1 naam>=<parameter1 waarde>&…&<parameterN naam>=<parameterN waarde>
+<resource path>?<parameter1 name>=<parameter1 value>&…&<parameterN name>=<parameterN value>
 ```
 
-Bij een HTTP POST request zijn er meerdere mogelijke manieren om parameters mee te geven. De gebruikte manier wordt aangegeven in de `Content-Type` header. De meegestuurde waardes zijn te vinden in de body van het request. Naast dat er meer vrijheid is in de vorm van de data (van url parameter vorm tot binaire data), is er ook de mogelijkheid om dit met HTTPS (SSL) te versleutelen. De is buiten de scope van de opdracht, maar wel relevante informatie. Een volledig POST request ziet er als volgt uit:
+In an HTTP POST request there are multiple ways to send data. You can still use URL parameters. You can also use the body of the request. The body can contain data in an arbitrary format. However, to ensure client and server understand each other, the applied format is specified in the `Content-Type` header. Aside from offering more options when posting data in the body, it is also more thoroughly encrypted using HTTPS (SSL). A complete POST request looks like:
 
 ```
 POST /search HTTP/1.1
@@ -139,7 +139,7 @@ Content-Type: application/x-www-form-urlencoded
 hl=nl&q=java
 ```
 
-Implementeer de (url) parameter methodes in de implementatie van de request interface voor zowel HTTP GET als HTTP POST. Pas het teruggegeven bericht aan zodat het de meegestuurde header en url parameters teruggeeft:
+Implement the (URL) parameter methods in your Request class. Make sure that the implementation can both handle GET and POST requests. Echo the received parameters to the response, for example:
 
 ```
 You did an http GET request and you requested the following resource: /books
@@ -158,9 +158,13 @@ Publisher: Manning
 
 ```
 
-Je kunt de implementatie van POST testen met tools als bijvoorbeeld [Postman](https://www.getpostman.com/).
+You can use [Postman](https://www.getpostman.com/) or curl to test your POST request.
 
-## Conclusie
-Je hebt net een webserver gemaakt die een inkomend request (in byte stream vorm) uitleest en in een voor de ontwikkelaar begrijpbare klasse omzet. Ook heb je een functie geschreven die een klasse omzet in een uitgaande byte stream. Hierdoor heb je een zogenaamde high-level laag (minder primitief en beter begrijpbaar) om de sockets heen gemaakt. Dit principe noemt men een framework, iets wat andere ontwikkelaars als basis kunnen gebruiken om hun eigen webapplicatie op te bouwen. Het is in principe niet aan de webserver om de logica te bepalen, maar aan de webapplicatie. De webserver heeft de fundering gelegd om dit mogelijk te maken.
+## Conclusion
 
-In plaats van relatieve hard-coded content teruggeven, zou je bestanden van de schijf kunnen halen (zoals HTML en Javascript bestanden) op basis van het opgevraagde resource path. Zo kan je met weinig moeite al een site opzetten. Deze zal nog relatief statisch zijn, in de zin van dat er geen achterliggend gedrag is waarmee je ingevulde gegevens kan persisteren. Met de Javascript bestanden zou je de door jou gebouwde webserver al kunnen gebruiken om een interactieve site te maken.
+You just made a simple web server that reads an incoming request (as a byte stream). The raw input then gets converted into a high-level class, which we developers can understand. You've also written a function that translates a high-level response class into the raw HTTP format. You've made a wrapper layer around the socket primitives. This is known as a framework - something you and other developers can use to build on top of. You can make a whole web application on top of this server without being concerned by the nitty-gritty details.
+
+It's a fun challenge to modify your web server slightly so that you can serve the website you've made during the front-end course. Instead of hard-coding your response, you can also read files dynamically from the file system based on the requested resource. With a few lines of code, you have a fully functioning website. For now that will be relatively static - there is no code or behaviour that allows you to edit and persist data. The final step would be to allow your web server to call certain Java methods based on the resource path (i.e. `/api/attractions` could call `new AttractionRepository().findAll()`).
+
+In future courses, you will use a web server framework made, and most importantly, battle-tested by others. However, it's just code, just like you've written today.
+
