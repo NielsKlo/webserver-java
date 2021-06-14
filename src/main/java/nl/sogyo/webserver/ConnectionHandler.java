@@ -18,13 +18,7 @@ public class ConnectionHandler implements Runnable {
         try {
 
             // Set up a reader that can conveniently read our incoming bytes as lines of text.
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String line = null;
-            do {
-                // Read the incoming message line by line and echo is to the system out.
-                line = reader.readLine();
-                System.out.println(line);
-            } while (!line.isEmpty());
+            HttpRequest request = new HttpRequest(socket);
             
             // Set up a writer that can write text to our binary output stream.
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
