@@ -1,7 +1,5 @@
 package nl.sogyo.webserver;
 
-import java.io.*;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,24 +7,16 @@ import java.util.List;
 public class HttpRequest {
     private HttpMethod method;
     private String resourcePath;
+    private String version;
     private final List<String> headerParameters = new ArrayList<>();
     private final HashMap<String, String> headerValues = new HashMap<>();
 
-    HttpRequest(Socket socket){
-        try{
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            parseStartLine(reader.readLine());
+    HttpRequest(ArrayList<String> list){
+        parseStartLine(list.remove(0));
 
-            String line = null;
-            do {
-                line = reader.readLine();
-                if(!line.isEmpty()){
-                    parseHeaderLine(line);
-                }
-            } while(!line.isEmpty());
-
-        } catch(IOException e){
-            e.printStackTrace();
+        for(String line : list){
+            if(line.isEmpty()) break;
+            parseHeaderLine(line);
         }
     }
 
@@ -34,6 +24,7 @@ public class HttpRequest {
         String[] parts = line.split(" ");
         method = HttpMethod.valueOf(parts[0]);
         resourcePath = parts[1];
+        version = parts[2];
     }
 
     private void parseHeaderLine(String line){
@@ -49,6 +40,8 @@ public class HttpRequest {
     String getResourcePath(){
         return resourcePath;
     }
+
+    String getVersion(){ return version; }
 
     List<String> getHeaderParameters(){
         return headerParameters;

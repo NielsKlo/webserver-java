@@ -3,6 +3,7 @@ package nl.sogyo.webserver;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 
 public class ConnectionHandler implements Runnable {
@@ -16,14 +17,25 @@ public class ConnectionHandler implements Runnable {
     /// instance of the connection handler class to a Thread.
     public void run() {
         try {
-
             // Set up a reader that can conveniently read our incoming bytes as lines of text.
-            HttpRequest request = new HttpRequest(socket);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            ArrayList<String> list = new ArrayList<>();
+            String line = reader.readLine();
+            do {
+                list.add(line);
+                line = reader.readLine();
+            } while (!line.isEmpty());
+
+            HttpRequest request = new HttpRequest(list);
+            System.out.println("You made an " + request.getVersion() + " " + request.getHTTPMethod().name() +
+                    " request and requested " + request.getResourcePath() + "\r\n");
             
             // Set up a writer that can write text to our binary output stream.
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             // Write a simple hello world textual response to the client.
-            writer.write("Thank you for connecting!\r\n");
+            writer.write("You made an " + request.getVersion() + " " + request.getHTTPMethod().name() +
+                    " request and requested " + request.getResourcePath() + "\r\n");
+            //writer.write("Thank you for connecting!\r\n");
             writer.flush();
 
         } catch (IOException e) {
@@ -55,7 +67,7 @@ public class ConnectionHandler implements Runnable {
             // the connection with our application logic. 
             while(true) {
                 // Wait for someone to connect. This call is blocking; i.e. our program is halted
-                // until someone connects to localhost:9090. A socker is a connection (a virtual
+                // until someone connects to localhost:9090. A socket is a connection (a virtual
                 // telephone line) between two endpoints - the client (browser) and the server (this).
                 Socket newConnection = socket.accept();
                 // We want to process our incoming call. Furthermore, we want to support multiple
@@ -67,7 +79,7 @@ public class ConnectionHandler implements Runnable {
                 // As our handling is in a background thread, we can accept new connections on the
                 // main thread (in the next iteration of the loop).
                 // Starting the thread is so-called fire and forget. The main thread starts a second
-                // thread and forgets about its existence. We recieve no feedback on whether the
+                // thread and forgets about its existence. We receive no feedback on whether the
                 // connection was handled gracefully.
                 threadPool.submit(new ConnectionHandler(newConnection));
             }

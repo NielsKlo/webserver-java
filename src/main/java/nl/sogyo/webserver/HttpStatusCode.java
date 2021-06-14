@@ -2,11 +2,11 @@ package nl.sogyo.webserver;
 
 /// Predefined status codes that inform the client about the handing of the request.
 public enum HttpStatusCode {
-    /// Processing of the request completed succesfully.
+    /// Processing of the request completed successfully.
     OK(200, "OK"), 
     /// Requested resource path was not found.
     NotFound(404, "Not Found"), 
-    /// An unexpected error occured while handling the request.
+    /// An unexpected error occurred while handling the request.
     ServerError(500, "Server Error");
 
     private int code;
