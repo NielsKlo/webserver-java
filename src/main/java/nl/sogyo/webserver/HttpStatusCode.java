@@ -5,7 +5,8 @@ public enum HttpStatusCode {
     /// Processing of the request completed successfully.
     OK(200, "OK"), 
     /// Requested resource path was not found.
-    NotFound(404, "Not Found"), 
+    NotFound(404, "Not Found"),
+    BadRequest(400, "Bad Request"),
     /// An unexpected error occurred while handling the request.
     ServerError(500, "Server Error");
 

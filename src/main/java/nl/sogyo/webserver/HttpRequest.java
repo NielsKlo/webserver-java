@@ -5,19 +5,26 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HttpRequest implements Request{
+    private HttpStatusCode statusCode;
     private HttpMethod method;
     private String resourcePath;
     private String version;
-    private final List<String> headerParameters = new ArrayList<>();
-    private final HashMap<String, String> headerValues = new HashMap<>();
+    private final HashMap<String, String> headers = new HashMap<>();
     private final HashMap<String, String> resourceParameters = new HashMap<>();
 
     HttpRequest(ArrayList<String> list){
-        parseStartLine(list.remove(0));
+        statusCode = HttpStatusCode.OK;
 
-        for(String line : list){
-            if(line.isEmpty()) break;
-            parseHeaderLine(line);
+        try {
+            parseStartLine(list.remove(0));
+
+            parseHeaders(list);
+
+            if (isPostRequestWithURLEncoded()) {
+                parseURLParameters(list);
+            }
+        } catch(Exception e){
+            statusCode = HttpStatusCode.BadRequest;
         }
     }
 
@@ -29,19 +36,59 @@ public class HttpRequest implements Request{
     }
 
     private void parseResourcePath(String resourceString){
-        String[] parts = resourceString.split("&");
+        String[] parts = resourceString.split("\\?");
         resourcePath = parts[0];
+        if(parts.length > 1){
+            String[] parameters = parts[1].split("&");
 
-        for(int i = 1; i < parts.length; i++){
-            String[] pair = parts[i].split("=");
-            resourceParameters.put(pair[0], pair[1]);
+            for (int i = 0; i < parameters.length; i++) {
+                String[] pair = parameters[i].split("=");
+                resourceParameters.put(pair[0], pair[1]);
+            }
+        }
+    }
+
+    private void parseHeaders(List<String> list){
+        int length =  list.size();
+
+        for(int i = 0; i < length; i++){
+            String line = list.get(0);
+
+            if(line.isEmpty()) {
+                list.remove(line);
+                break;
+            }
+
+            parseHeaderLine(line);
+            list.remove(line);
         }
     }
 
     private void parseHeaderLine(String line){
         String[] header = line.split(": ");
-        headerParameters.add(header[0]);
-        headerValues.put(header[0], header[1]);
+        headers.put(header[0], header[1]);
+    }
+
+    private boolean isPostRequestWithURLEncoded(){
+        return method == HttpMethod.POST &&
+                headers.get("Content-Type").equals("application/x-www-form-urlencoded");
+    }
+
+    private void parseURLParameters(List<String> list){
+        if(list.size() != 1){
+            statusCode = HttpStatusCode.BadRequest;
+        }
+        String[] parameters = list.get(0).split("&");
+
+
+        for(String parameter : parameters){
+            String[] pair = parameter.split("=");
+            resourceParameters.put(pair[0], pair[1]);
+        }
+    }
+
+    public HttpStatusCode getStatusCode(){
+        return statusCode;
     }
 
     public HttpMethod getHTTPMethod(){
@@ -55,18 +102,18 @@ public class HttpRequest implements Request{
     public String getVersion(){ return version; }
 
     public List<String> getHeaderParameterNames(){
-        return headerParameters;
+        return new ArrayList<>(headers.keySet());
     }
 
     public String getHeaderParameterValue(String name){
-        return headerValues.get(name);
+        return headers.get(name);
     }
 
     public List<String> getParameterNames(){
-        return null;
+        return new ArrayList<>(resourceParameters.keySet());
     }
 
     public String getParameterValue(String name){
-        return null;
+        return resourceParameters.get(name);
     }
 }

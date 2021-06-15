@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpResponse implements Response{
@@ -16,19 +17,47 @@ public class HttpResponse implements Response{
     ZonedDateTime dateTime;
     String content;
 
-    public HttpResponse(HttpStatusCode status, HttpRequest request){
-        this.version = request.getVersion();
+    public HttpResponse(HttpRequest request){
+        this.statusCode = request.getStatusCode();
         this.method = request.getHTTPMethod().name();
         this.resource = request.getResourcePath();
-        this.statusCode = status;
+        this.version = request.getVersion();
         this.dateTime = ZonedDateTime.now();
-        makeContent();
+        makeContent(request);
         makeCustomHeaders();
     }
 
-    private void makeContent(){
-        content = "<html>\r\n<body>\r\nYou did an " + version + " " + method + "<br/>\r\n" +
-                "Requested resource: " + resource + "\r\n</body>\r\n</html>\r\n";
+    private void makeContent(HttpRequest request){
+        String contentHeader = makeContentHeader();
+        String headerParameters = makeHeaderParametersString(request);
+        String parameters = makeParametersString(request);
+        content = "<html>\r\n<body>\r\n" + contentHeader + headerParameters + parameters + "</body>\r\n</html>\r\n";
+    }
+
+    private String makeContentHeader(){
+        return "You did an " + version + " " + method + " and you requested the following resource: " + resource + "<br><br>\r\n";
+    }
+
+    private String makeHeaderParametersString(HttpRequest request){
+        String parameters = "<br>\r\n";
+        List<String> headerParameterNames = request.getHeaderParameterNames();
+
+        for(String name : headerParameterNames){
+            String value = request.getHeaderParameterValue(name);
+            parameters += name + ": " + value + "<br>\r\n";
+        }
+        return parameters;
+    }
+
+    private String makeParametersString(HttpRequest request){
+        String parameters = "<br>\r\n";
+        List<String> parameterList = request.getParameterNames();
+
+        for(String name : parameterList){
+             String value = request.getParameterValue(name);
+             parameters += name + ": " + value + "<br>\r\n";
+        }
+        return parameters;
     }
 
     private void makeCustomHeaders(){
@@ -68,7 +97,7 @@ public class HttpResponse implements Response{
 
         response += writeFirstLine();
         response += writeHeaders();
-        response += writeContent();
+        response += getContent();
 
         return response;
     }
@@ -91,9 +120,5 @@ public class HttpResponse implements Response{
         allHeaders += "\r\n";
 
         return allHeaders;
-    }
-
-    private String writeContent(){
-        return content;
     }
 }

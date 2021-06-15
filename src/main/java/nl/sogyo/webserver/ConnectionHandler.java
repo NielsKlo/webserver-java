@@ -21,17 +21,19 @@ public class ConnectionHandler implements Runnable {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             ArrayList<String> list = new ArrayList<>();
             String line = reader.readLine();
-            do {
+
+            while(line != null){
                 list.add(line);
                 line = reader.readLine();
-            } while (!line.isEmpty());
-
+                System.out.println(line);
+            }
+            System.out.println("out of while");
             HttpRequest request = new HttpRequest(list);
             
             // Set up a writer that can write text to our binary output stream.
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             // Write a simple hello world textual response to the client.
-            HttpResponse response = new HttpResponse(HttpStatusCode.OK, request);
+            HttpResponse response = new HttpResponse(request);
             response.getResponse(writer);
             writer.flush();
 

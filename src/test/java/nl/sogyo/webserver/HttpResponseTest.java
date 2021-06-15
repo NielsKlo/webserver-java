@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HttpResponseTest {
     final HttpRequest request = HttpRequestTest.makeHttpRequest();
-    final HttpResponse response = new HttpResponse(HttpStatusCode.OK, request);
+    final HttpResponse response = new HttpResponse(request);
 
     @Test
     public void response_Has_Expected_Status_Code(){
