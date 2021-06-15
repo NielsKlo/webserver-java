@@ -22,11 +22,22 @@ public class ConnectionHandler implements Runnable {
             ArrayList<String> list = new ArrayList<>();
             String line = reader.readLine();
 
-            while(line != null){
+            do {
                 list.add(line);
                 line = reader.readLine();
                 System.out.println(line);
-            }
+            } while(!line.isEmpty());
+
+            System.out.println("B");
+            line = reader.readLine();
+            System.out.println("C");
+
+            do {
+                System.out.println("hello");
+                list.add(line);
+                line = reader.readLine();
+            } while(!line.isEmpty());
+
             System.out.println("out of while");
             HttpRequest request = new HttpRequest(list);
             
