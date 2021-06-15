@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.*;
 
 public class ConnectionHandler implements Runnable {
-    private Socket socket;
+    private final Socket socket;
 
     public ConnectionHandler(Socket toHandle) {
         this.socket = toHandle;
@@ -27,15 +27,12 @@ public class ConnectionHandler implements Runnable {
             } while (!line.isEmpty());
 
             HttpRequest request = new HttpRequest(list);
-            System.out.println("You made an " + request.getVersion() + " " + request.getHTTPMethod().name() +
-                    " request and requested " + request.getResourcePath() + "\r\n");
             
             // Set up a writer that can write text to our binary output stream.
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             // Write a simple hello world textual response to the client.
-            writer.write("You made an " + request.getVersion() + " " + request.getHTTPMethod().name() +
-                    " request and requested " + request.getResourcePath() + "\r\n");
-            //writer.write("Thank you for connecting!\r\n");
+            HttpResponse response = new HttpResponse(HttpStatusCode.OK, request);
+            response.getResponse(writer);
             writer.flush();
 
         } catch (IOException e) {

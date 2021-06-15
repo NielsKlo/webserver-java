@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class HttpRequest {
+public class HttpRequest implements Request{
     private HttpMethod method;
     private String resourcePath;
     private String version;
     private final List<String> headerParameters = new ArrayList<>();
     private final HashMap<String, String> headerValues = new HashMap<>();
+    private final HashMap<String, String> resourceParameters = new HashMap<>();
 
     HttpRequest(ArrayList<String> list){
         parseStartLine(list.remove(0));
@@ -23,8 +24,18 @@ public class HttpRequest {
     private void parseStartLine(String line){
         String[] parts = line.split(" ");
         method = HttpMethod.valueOf(parts[0]);
-        resourcePath = parts[1];
+        parseResourcePath(parts[1]);
         version = parts[2];
+    }
+
+    private void parseResourcePath(String resourceString){
+        String[] parts = resourceString.split("&");
+        resourcePath = parts[0];
+
+        for(int i = 1; i < parts.length; i++){
+            String[] pair = parts[i].split("=");
+            resourceParameters.put(pair[0], pair[1]);
+        }
     }
 
     private void parseHeaderLine(String line){
@@ -33,29 +44,29 @@ public class HttpRequest {
         headerValues.put(header[0], header[1]);
     }
 
-    HttpMethod getHTTPMethod(){
+    public HttpMethod getHTTPMethod(){
         return method;
     }
 
-    String getResourcePath(){
+    public String getResourcePath(){
         return resourcePath;
     }
 
-    String getVersion(){ return version; }
+    public String getVersion(){ return version; }
 
-    List<String> getHeaderParameters(){
+    public List<String> getHeaderParameterNames(){
         return headerParameters;
     }
 
-    String getHeaderParameterValues(String name){
+    public String getHeaderParameterValue(String name){
         return headerValues.get(name);
     }
 
-    List<String> getParameterNames(){
+    public List<String> getParameterNames(){
         return null;
     }
 
-    String getParameterValue(String name){
+    public String getParameterValue(String name){
         return null;
     }
 }
