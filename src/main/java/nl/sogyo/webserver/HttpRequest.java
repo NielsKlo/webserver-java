@@ -12,12 +12,11 @@ public class HttpRequest implements Request{
     private final HashMap<String, String> headers = new HashMap<>();
     private final HashMap<String, String> resourceParameters = new HashMap<>();
 
-    HttpRequest(ArrayList<String> list){
+    HttpRequest(List<String> list){
         statusCode = HttpStatusCode.OK;
 
         try {
             parseStartLine(list.remove(0));
-
             parseHeaders(list);
 
             if (isPostRequestWithURLEncoded()) {
@@ -38,13 +37,17 @@ public class HttpRequest implements Request{
     private void parseResourcePath(String resourceString){
         String[] parts = resourceString.split("\\?");
         resourcePath = parts[0];
+
         if(parts.length > 1){
             String[] parameters = parts[1].split("&");
+            addParameters(parameters);
+        }
+    }
 
-            for (int i = 0; i < parameters.length; i++) {
-                String[] pair = parameters[i].split("=");
-                resourceParameters.put(pair[0], pair[1]);
-            }
+    private void addParameters(String[] parameters){
+        for (String parameter : parameters) {
+            String[] pair = parameter.split("=");
+            resourceParameters.put(pair[0], pair[1]);
         }
     }
 
@@ -71,6 +74,7 @@ public class HttpRequest implements Request{
 
     private boolean isPostRequestWithURLEncoded(){
         return method == HttpMethod.POST &&
+                headers.containsKey("Content-Type") &&
                 headers.get("Content-Type").equals("application/x-www-form-urlencoded");
     }
 
@@ -80,11 +84,7 @@ public class HttpRequest implements Request{
         }
         String[] parameters = list.get(0).split("&");
 
-
-        for(String parameter : parameters){
-            String[] pair = parameter.split("=");
-            resourceParameters.put(pair[0], pair[1]);
-        }
+        addParameters(parameters);
     }
 
     public HttpStatusCode getStatusCode(){

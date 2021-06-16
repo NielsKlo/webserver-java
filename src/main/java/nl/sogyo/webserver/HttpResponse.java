@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpResponse implements Response{
-    String version;
-    String method;
-    String resource;
-    HttpStatusCode statusCode;
-    HashMap<String, String> customHeaders = new HashMap<>();
-    ZonedDateTime dateTime;
-    String content;
+    private final String version;
+    private final String method;
+    private final String resource;
+    private final HttpStatusCode statusCode;
+    private final HashMap<String, String> customHeaders = new HashMap<>();
+    private final ZonedDateTime dateTime;
+    private String content;
 
     public HttpResponse(HttpRequest request){
         this.statusCode = request.getStatusCode();
@@ -84,20 +84,12 @@ public class HttpResponse implements Response{
         return content;
     }
 
-    public void getResponse(BufferedWriter writer){
-        try {
-            writer.write(writeResponse());
-        } catch (IOException ioe){
-            ioe.printStackTrace();
-        }
-    }
-
-    private String writeResponse(){
+    public String getResponse(){
         String response = "";
 
         response += writeFirstLine();
         response += writeHeaders();
-        response += getContent();
+        response += content;
 
         return response;
     }
